@@ -85,6 +85,17 @@
   color-scheme: light;
 }
 
+/* ──── Main Grid (responsive form + map layout) ──── */
+.main-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+@media (min-width: 1024px) {
+  .main-grid {
+    grid-template-columns: 360px 1fr;
+  }
+}
+
 /* ──── Base Reset ──── */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }

@@ -150,8 +150,9 @@ export default function Home() {
   const fetchReports = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/reports`);
+      if (!res.ok) return; // backend error — keep existing reports
       const data = await res.json();
-      setReports(data);
+      if (Array.isArray(data)) setReports(data);
     } catch {
       // backend may not be running
     }
@@ -262,7 +263,7 @@ export default function Home() {
         </div>
 
         {/* Main Grid */}
-        <div style={{ display: 'grid', gap: '1.25rem' }} className="lg:grid-cols-[360px_1fr]">
+        <div className="main-grid">
 
           {/* ── Left: Form ── */}
           <div className="card glass animate-in" style={{ padding: '1.5rem' }}>
