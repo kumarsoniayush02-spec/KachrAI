@@ -64,10 +64,19 @@ function SeverityBar({ score }: { score: number }) {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, onClick }: { status: string; onClick?: () => void }) {
   const cls = status === 'Resolved' ? 'badge-resolved' : status === 'Dispatched' ? 'badge-dispatched' : 'badge-pending';
   const icon = status === 'Resolved' ? '✓' : status === 'Dispatched' ? '→' : '●';
-  return <span className={`badge ${cls}`}>{icon} {status}</span>;
+  return (
+    <span
+      className={`badge ${cls} ${onClick ? 'badge-clickable' : ''}`}
+      onClick={onClick}
+      title={onClick ? 'Click to change status' : undefined}
+      role={onClick ? 'button' : undefined}
+    >
+      {icon} {status}
+    </span>
+  );
 }
 
 function Stat({ label, value, color, icon }: { label: string; value: number; color: string; icon: string }) {
@@ -212,6 +221,23 @@ export default function Home() {
     } finally {
       setDeletingId(null);
       setDeleteTarget(null);
+    }
+  };
+
+  const handleStatusChange = async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/reports/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setReports(prev => prev.map(r => r._id === id ? { ...r, status: data.report.status } : r));
+      } else {
+        showMsg('Failed to update status.', 'error');
+      }
+    } catch {
+      showMsg('Server connection failed.', 'error');
     }
   };
 
@@ -407,7 +433,7 @@ export default function Home() {
                             </p>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexShrink: 0 }}>
-                            <StatusBadge status={rep.status} />
+                            <StatusBadge status={rep.status} onClick={() => handleStatusChange(rep._id)} />
                             <button
                               className="btn-icon-delete"
                               title="Delete report"

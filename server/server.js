@@ -125,6 +125,33 @@ app.post('/api/reports', async (req, res) => {
   }
 });
 
+// PATCH report status (cycle: Pending → Dispatched → Resolved)
+const STATUS_CYCLE = { Pending: 'Dispatched', Dispatched: 'Resolved', Resolved: 'Pending' };
+
+app.patch('/api/reports/:id/status', async (req, res) => {
+  try {
+    // Allow explicit status in body, or auto-cycle
+    const nextStatus = req.body.status;
+
+    if (dbConnected) {
+      const report = await Report.findById(req.params.id);
+      if (!report) return res.status(404).json({ error: 'Report not found' });
+      report.status = nextStatus || STATUS_CYCLE[report.status] || 'Pending';
+      await report.save();
+      return res.json({ message: 'Status updated', report });
+    }
+
+    // In-memory fallback
+    const report = memoryStore.find(r => r._id === req.params.id);
+    if (!report) return res.status(404).json({ error: 'Report not found' });
+    report.status = nextStatus || STATUS_CYCLE[report.status] || 'Pending';
+    res.json({ message: 'Status updated', report });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update status' });
+  }
+});
+
 // DELETE a single report
 app.delete('/api/reports/:id', async (req, res) => {
   try {

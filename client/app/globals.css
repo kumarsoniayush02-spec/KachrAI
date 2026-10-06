@@ -394,6 +394,19 @@ body {
   color: var(--green);
   border: 1px solid rgba(34, 197, 94, 0.15);
 }
+.badge-clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.badge-clickable:hover {
+  transform: scale(1.08);
+  filter: brightness(1.2);
+  box-shadow: 0 0 8px currentColor;
+}
+.badge-clickable:active {
+  transform: scale(0.95);
+}
 
 /* ──── Severity Bar ──── */
 .sev-bar {
